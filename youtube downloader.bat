@@ -2,22 +2,22 @@
 setlocal enabledelayedexpansion
 
 :: ================================================================
-:: DESCARGADOR MULTIPLATAFORMA (YouTube / YouTube Music / Spotify)
-:: - yt-dlp para YouTube y YouTube Music (MP3 o MP4)
-:: - spotdl para Spotify (solo audio MP3)
-:: - Espera entre elementos SOLO cuando es una lista
-:: - NO comprueba actualizaciones (usa instalar_dependencias.bat manualmente)
+:: MULTI-PLATFORM DOWNLOADER (YouTube / YouTube Music / Spotify)
+:: - yt-dlp for YouTube and YouTube Music (MP3 or MP4)
+:: - spotdl for Spotify (audio only, MP3)
+:: - Waits between items ONLY when it is a playlist
+:: - Does NOT check for updates (run install_dependencies.bat manually)
 :: ================================================================
 
 set "EXIT_CODE=0"
 
 echo ========================================
-echo   DESCARGADOR DE MUSICA / VIDEO
+echo   MUSIC / VIDEO DOWNLOADER
 echo ========================================
 echo.
 
 :: ---------------------------------------------------------------
-:: 1) Localizar yt-dlp (rapido, sin ejecutar --version)
+:: 1) Locate yt-dlp (fast, without running --version)
 :: ---------------------------------------------------------------
 set "YTDLP_CMD="
 where yt-dlp >nul 2>&1 && set "YTDLP_CMD=yt-dlp"
@@ -36,7 +36,7 @@ if not defined YTDLP_CMD (
 )
 
 :: ---------------------------------------------------------------
-:: 1b) Localizar spotdl (para Spotify)
+:: 1b) Locate spotdl (for Spotify)
 :: ---------------------------------------------------------------
 set "SPOTDL_CMD="
 where spotdl >nul 2>&1 && set "SPOTDL_CMD=spotdl"
@@ -55,66 +55,66 @@ if not defined SPOTDL_CMD (
 )
 
 :: ---------------------------------------------------------------
-:: 1c) Localizar un runtime de JavaScript (Deno) para yt-dlp.
-:: YouTube ahora requiere ejecutar un reto JS; sin runtime a veces
-:: solo se obtiene el audio. Reutilizamos el Deno de spotdl si existe.
+:: 1c) Locate a JavaScript runtime (Deno) for yt-dlp.
+:: YouTube now requires solving a JS challenge; without a runtime
+:: sometimes only the audio is available. Reuse spotdl's Deno if present.
 :: ---------------------------------------------------------------
 set "DENO_ARG="
 where deno >nul 2>&1 && set "DENO_ARG=--js-runtimes deno"
 if not defined DENO_ARG if exist "%USERPROFILE%\.spotdl\deno.exe" set "DENO_ARG=--js-runtimes deno:%USERPROFILE%\.spotdl\deno.exe"
 
 :: ---------------------------------------------------------------
-:: 2) Pedir URL
+:: 2) Ask for the URL
 :: ---------------------------------------------------------------
-set /p "URL=Pega la URL (cancion, video, lista o album): "
+set /p "URL=Paste the URL (song, video, playlist or album): "
 if "!URL!"=="" (
-    echo [ERROR] No se proporciono URL
+    echo [ERROR] No URL provided
     set "EXIT_CODE=1"
     goto :end
 )
 
-:: Limpiar: si hay texto pegado delante, quedarnos desde "https"
+:: Clean up: if there is text pasted before it, keep from "https" onward
 if not "!URL!"=="!URL:https=!" set "URL=https!URL:*https=!"
 echo [INFO] URL: !URL!
 echo.
 
 :: ---------------------------------------------------------------
-:: 3) Detectar plataforma (por substring, seguro con & en la URL)
+:: 3) Detect platform (by substring, safe with & in the URL)
 :: ---------------------------------------------------------------
 set "PLATFORM=youtube"
 if not "!URL!"=="!URL:open.spotify.com=!" set "PLATFORM=spotify"
 if not "!URL!"=="!URL:spotify:=!" set "PLATFORM=spotify"
 
 if "!PLATFORM!"=="spotify" (
-    echo [INFO] Plataforma detectada: Spotify (solo audio MP3^)
+    echo [INFO] Detected platform: Spotify ^(audio only, MP3^)
 ) else (
-    echo [INFO] Plataforma detectada: YouTube / YouTube Music / otros
+    echo [INFO] Detected platform: YouTube / YouTube Music / other
 )
 echo.
 
 :: ---------------------------------------------------------------
-:: 4) Comprobar que existe la herramienta necesaria
+:: 4) Check that the required tool is available
 :: ---------------------------------------------------------------
 if "!PLATFORM!"=="spotify" (
     if not defined SPOTDL_CMD (
-        echo [ERROR] Spotify necesita 'spotdl' y no esta instalado.
-        echo Instalalo con:  pip install spotdl
-        echo (spotdl tambien requiere yt-dlp y ffmpeg^)
+        echo [ERROR] Spotify requires 'spotdl' and it is not installed.
+        echo Install it with:  pip install spotdl
+        echo ^(spotdl also requires yt-dlp and ffmpeg^)
         set "EXIT_CODE=1"
         goto :end
     )
 ) else (
     if not defined YTDLP_CMD (
-        echo [ERROR] yt-dlp no esta instalado o no se encuentra.
-        echo Instalalo con:  pip install yt-dlp
-        echo O descarga desde: https://github.com/yt-dlp/yt-dlp
+        echo [ERROR] yt-dlp is not installed or could not be found.
+        echo Install it with:  pip install yt-dlp
+        echo Or download it from: https://github.com/yt-dlp/yt-dlp
         set "EXIT_CODE=1"
         goto :end
     )
 )
 
 :: ---------------------------------------------------------------
-:: 5) Detectar si es una LISTA / ALBUM
+:: 5) Detect whether it is a PLAYLIST / ALBUM
 :: ---------------------------------------------------------------
 set "IS_PLAYLIST=0"
 if "!PLATFORM!"=="spotify" (
@@ -129,92 +129,92 @@ if "!PLATFORM!"=="spotify" (
     if not "!URL!"=="!URL:/@=!" set "IS_PLAYLIST=1"
 )
 
-:: Confirmar cuando parece lista (por si es un video suelto dentro de una lista)
+:: Confirm when it looks like a playlist (in case it is a single video inside a list)
 if "!IS_PLAYLIST!"=="1" (
-    set /p "CONFIRM=Parece una LISTA. Descargar todos los elementos? (S/N, Enter=S): "
+    set /p "CONFIRM=This looks like a PLAYLIST. Download all items? (Y/N, Enter=Y): "
     if /i "!CONFIRM!"=="N" set "IS_PLAYLIST=0"
     echo.
 )
 
 :: ---------------------------------------------------------------
-:: 6) Elegir formato (Spotify se fuerza a MP3)
+:: 6) Choose format (Spotify is forced to MP3)
 :: ---------------------------------------------------------------
 if "!PLATFORM!"=="spotify" (
     set "FORMATO=mp3"
-    echo [INFO] Spotify solo permite audio: formato MP3
+    echo [INFO] Spotify only allows audio: MP3 format
 ) else (
-    echo Selecciona el formato:
-    echo   1. MP3 ^(solo audio^)
+    echo Select the format:
+    echo   1. MP3 ^(audio only^)
     echo   2. MP4 ^(video^)
-    set /p "OPT=Tu eleccion (1 o 2, Enter=1): "
+    set /p "OPT=Your choice (1 or 2, Enter=1): "
     if "!OPT!"=="2" (
         set "FORMATO=mp4"
     ) else (
         set "FORMATO=mp3"
     )
-    echo Formato seleccionado: !FORMATO!
+    echo Selected format: !FORMATO!
 )
 echo.
 
-:: Calidad de video (solo MP4). Por defecto 1080p.
+:: Video quality (MP4 only). Default 1080p.
 set "VQ=1080"
 if /i "!FORMATO!"=="mp4" (
-    echo Calidad maxima de video:
+    echo Maximum video quality:
     echo   1. 2160p ^(4K^)
     echo   2. 1440p ^(2K^)
-    echo   3. 1080p ^(Full HD^) [por defecto]
+    echo   3. 1080p ^(Full HD^) [default]
     echo   4. 720p ^(HD^)
     echo   5. 480p
-    set /p "VOPT=Tu eleccion (1-5, Enter=3): "
+    set /p "VOPT=Your choice (1-5, Enter=3): "
     if "!VOPT!"=="1" set "VQ=2160"
     if "!VOPT!"=="2" set "VQ=1440"
     if "!VOPT!"=="3" set "VQ=1080"
     if "!VOPT!"=="4" set "VQ=720"
     if "!VOPT!"=="5" set "VQ=480"
-    echo Calidad seleccionada: !VQ!p ^(o la mas cercana disponible^)
+    echo Selected quality: !VQ!p ^(or the closest available^)
     echo.
 )
 
 :: ---------------------------------------------------------------
-:: 7) Carpeta de destino
+:: 7) Destination folder
 :: ---------------------------------------------------------------
-set /p "DOWNLOAD_PATH=Carpeta de destino (Enter = carpeta actual): "
+set /p "DOWNLOAD_PATH=Destination folder (Enter = current folder): "
 if "!DOWNLOAD_PATH!"=="" set "DOWNLOAD_PATH=."
 if not exist "!DOWNLOAD_PATH!" mkdir "!DOWNLOAD_PATH!" 2>nul
 echo.
 
 :: ---------------------------------------------------------------
-:: 8) Segundos de espera (solo si es lista)
+:: 8) Wait seconds (only if it is a playlist)
 :: ---------------------------------------------------------------
 set "SLEEP=0"
 if "!IS_PLAYLIST!"=="1" (
-    set /p "SLEEP=Segundos de espera entre elementos (Enter = 5): "
+    set /p "SLEEP=Seconds to wait between items (Enter = 5): "
     if "!SLEEP!"=="" set "SLEEP=5"
-    echo [INFO] Se esperara !SLEEP!s entre elementos para evitar bloqueos.
+    echo [INFO] Will wait !SLEEP!s between items to avoid rate limits.
     echo.
 )
 
 echo ========================================
-echo   Iniciando descarga...
+echo   Starting download...
 echo ========================================
 echo.
 
 :: ===============================================================
-:: DESCARGA CON SPOTDL (Spotify)
+:: DOWNLOAD WITH SPOTDL (Spotify)
 :: ===============================================================
 if "!PLATFORM!"=="spotify" (
-    echo [INFO] Descargando desde Spotify con spotdl...
-    echo [INFO] Proveedores: youtube-music, youtube, soundcloud (con reintentos^)
+    echo [INFO] Downloading from Spotify with spotdl...
+    echo [INFO] Providers: youtube-music, youtube, soundcloud ^(with retries^)
     "!SPOTDL_CMD!" download "!URL!" --format mp3 --bitrate 320k --audio youtube-music youtube soundcloud --max-retries 3 --yt-dlp-args "--retries 5 --fragment-retries 5" --print-errors --output "!DOWNLOAD_PATH!\{artists} - {title}.{output-ext}"
     set "DOWNLOAD_ERROR=!errorlevel!"
     goto :result
 )
 
 :: ===============================================================
-:: DESCARGA CON YT-DLP (YouTube / YouTube Music / otros)
+:: DOWNLOAD WITH YT-DLP (YouTube / YouTube Music / other)
 :: ===============================================================
 
-:: Opciones de lista vs elemento unico
+:: Playlist vs single item options
 if "!IS_PLAYLIST!"=="1" (
     set "PL_OPTS=--yes-playlist --sleep-interval !SLEEP! --ignore-errors"
     set "OUT_TMPL=!DOWNLOAD_PATH!\%%(playlist_index)s - %%(title)s.%%(ext)s"
@@ -223,26 +223,26 @@ if "!IS_PLAYLIST!"=="1" (
     set "OUT_TMPL=!DOWNLOAD_PATH!\%%(title)s.%%(ext)s"
 )
 
-:: Clientes por defecto de yt-dlp (dan acceso a formatos DASH de alta calidad).
-:: Nota: NO forzamos player_client=android porque limita el video a 360p.
+:: Default yt-dlp clients (give access to high-quality DASH formats).
+:: Note: we do NOT force player_client=android because it caps video to 360p.
 set "COMMON=--no-warnings !PL_OPTS! !DENO_ARG!"
 
 if /i "!FORMATO!"=="mp3" (
-    echo Descargando audio MP3...
+    echo Downloading MP3 audio...
     "!YTDLP_CMD!" !COMMON! -f "bestaudio/best" -x --audio-format mp3 --audio-quality 0 --output "!OUT_TMPL!" "!URL!"
     set "DOWNLOAD_ERROR=!errorlevel!"
 ) else (
-    echo Descargando video MP4 ^(hasta !VQ!p^)...
+    echo Downloading MP4 video ^(up to !VQ!p^)...
     "!YTDLP_CMD!" !COMMON! -f "bv*[height<=!VQ!][ext=mp4]+ba[ext=m4a]/bv*[height<=!VQ!]+ba/b[height<=!VQ!]/bv*+ba/b" --merge-output-format mp4 --output "!OUT_TMPL!" "!URL!"
     set "DOWNLOAD_ERROR=!errorlevel!"
 )
 
-:: Reintento con formato alternativo SOLO para elemento unico.
-:: En listas, --ignore-errors ya gestiona los fallos por elemento, asi que
-:: no reintentamos toda la lista (evita volver a descargar lo ya bajado).
+:: Retry with an alternative format ONLY for a single item.
+:: For playlists, --ignore-errors already handles per-item failures, so we do
+:: not retry the whole playlist (this avoids re-downloading what is already done).
 if "!IS_PLAYLIST!"=="0" if !DOWNLOAD_ERROR! neq 0 (
     echo.
-    echo [INFO] Primer intento fallo ^(codigo !DOWNLOAD_ERROR!^). Probando alternativa...
+    echo [INFO] First attempt failed ^(code !DOWNLOAD_ERROR!^). Trying an alternative...
     echo.
     if /i "!FORMATO!"=="mp3" (
         "!YTDLP_CMD!" !COMMON! -f "bestaudio" -x --audio-format mp3 --audio-quality 0 --output "!OUT_TMPL!" "!URL!"
@@ -256,19 +256,19 @@ if "!IS_PLAYLIST!"=="0" if !DOWNLOAD_ERROR! neq 0 (
 :result
 echo.
 if !DOWNLOAD_ERROR! equ 0 (
-    echo [EXITO] Descarga completada
+    echo [SUCCESS] Download completed
 ) else (
     if "!IS_PLAYLIST!"=="1" (
-        echo [AVISO] Lista finalizada. Algunos elementos se omitieron
-        echo         ^(no disponibles, privados o restringidos^). El resto se descargo.
+        echo [NOTICE] Playlist finished. Some items were skipped
+        echo          ^(unavailable, private or restricted^). The rest were downloaded.
     ) else (
-        echo [ERROR] La descarga fallo ^(codigo !DOWNLOAD_ERROR!^)
+        echo [ERROR] Download failed ^(code !DOWNLOAD_ERROR!^)
         echo.
-        echo Posibles soluciones:
-        echo   1. Verifica que la URL sea valida
-        echo   2. Actualiza las librerias ejecutando: instalar_dependencias.bat
-        echo   3. El contenido puede estar restringido o no disponible
-        echo   4. Revisa tu conexion a internet
+        echo Possible fixes:
+        echo   1. Check that the URL is valid
+        echo   2. Update the libraries by running: install_dependencies.bat
+        echo   3. The content may be restricted or unavailable
+        echo   4. Check your internet connection
         set "EXIT_CODE=1"
     )
 )
@@ -276,15 +276,15 @@ if !DOWNLOAD_ERROR! equ 0 (
 :end
 echo.
 echo ========================================
-echo   Resumen
+echo   Summary
 echo ========================================
-if defined PLATFORM      echo Plataforma: !PLATFORM!
+if defined PLATFORM      echo Platform: !PLATFORM!
 if defined URL           echo URL: !URL!
-if defined FORMATO        echo Formato: !FORMATO!
-if /i "!FORMATO!"=="mp4"  echo Calidad: hasta !VQ!p
-if defined DOWNLOAD_PATH  echo Carpeta: !DOWNLOAD_PATH!
-if "!IS_PLAYLIST!"=="1"   echo Lista: si (espera !SLEEP!s^)
-if defined DOWNLOAD_ERROR echo Codigo final: !DOWNLOAD_ERROR!
+if defined FORMATO        echo Format: !FORMATO!
+if /i "!FORMATO!"=="mp4"  echo Quality: up to !VQ!p
+if defined DOWNLOAD_PATH  echo Folder: !DOWNLOAD_PATH!
+if "!IS_PLAYLIST!"=="1"   echo Playlist: yes (wait !SLEEP!s^)
+if defined DOWNLOAD_ERROR echo Final code: !DOWNLOAD_ERROR!
 echo ========================================
 echo.
 pause

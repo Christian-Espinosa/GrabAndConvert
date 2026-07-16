@@ -1,20 +1,20 @@
 @echo off
 setlocal enabledelayedexpansion
-title Instalar / Actualizar dependencias
+title Install / Update dependencies
 
 echo ==========================================================
-echo   INSTALAR / ACTUALIZAR DEPENDENCIAS
+echo   INSTALL / UPDATE DEPENDENCIES
 echo ==========================================================
-echo Comprueba, instala y actualiza todo lo que necesitan los
-echo scripts de este repositorio:
-echo   - yt-dlp   ^(descargas de YouTube / YouTube Music^)
-echo   - spotdl   ^(descargas de Spotify^)
-echo   - ffmpeg   ^(conversion de audio / video / imagen^)
-echo   - Deno     ^(motor JS que yt-dlp necesita para YouTube^)
+echo Checks, installs and updates everything the scripts in this
+echo repository need:
+echo   - yt-dlp   ^(YouTube / YouTube Music downloads^)
+echo   - spotdl   ^(Spotify downloads^)
+echo   - ffmpeg   ^(audio / video / image conversion^)
+echo   - Deno     ^(JS runtime that yt-dlp needs for YouTube^)
 echo.
 
 :: ---------------------------------------------------------------
-:: 1) Localizar Python / pip
+:: 1) Locate Python / pip
 :: ---------------------------------------------------------------
 set "PIP_CMD="
 py -m pip --version >nul 2>&1 && set "PIP_CMD=py -m pip"
@@ -26,53 +26,53 @@ if not defined PIP_CMD (
 )
 
 if not defined PIP_CMD (
-    echo [ERROR] No se encontro Python/pip en el sistema.
+    echo [ERROR] Python/pip was not found on this system.
     echo.
-    echo Instala Python desde https://www.python.org/downloads/
-    echo y marca la casilla "Add Python to PATH" durante la instalacion.
-    echo Despues vuelve a ejecutar este script.
+    echo Install Python from https://www.python.org/downloads/
+    echo and tick the "Add Python to PATH" box during installation.
+    echo Then run this script again.
     goto :end
 )
-echo [OK] pip encontrado: !PIP_CMD!
+echo [OK] pip found: !PIP_CMD!
 echo.
 
 :: ---------------------------------------------------------------
-:: 2) yt-dlp  (instalar o actualizar)
+:: 2) yt-dlp  (install or update)
 :: ---------------------------------------------------------------
 echo ---------------- yt-dlp ----------------
 !PIP_CMD! install --upgrade yt-dlp
 echo.
 
 :: ---------------------------------------------------------------
-:: 3) spotdl  (instalar o actualizar)
+:: 3) spotdl  (install or update)
 :: ---------------------------------------------------------------
 echo ---------------- spotdl ----------------
 !PIP_CMD! install --upgrade spotdl
 echo.
 
 :: ---------------------------------------------------------------
-:: 4) Localizar los ejecutables instalados (pip los pone en Scripts,
-::    que a veces no esta en el PATH)
+:: 4) Locate the installed executables (pip puts them in Scripts,
+::    which is sometimes not on the PATH)
 :: ---------------------------------------------------------------
 call :find_tool YTDLP_CMD yt-dlp
 call :find_tool SPOTDL_CMD spotdl
 
 :: ---------------------------------------------------------------
-:: 5) Deno (motor JavaScript que yt-dlp usa para descifrar YouTube)
+:: 5) Deno (JavaScript runtime that yt-dlp uses to decode YouTube)
 :: ---------------------------------------------------------------
 echo ---------------- Deno ----------------
 where deno >nul 2>&1
 if !errorlevel! equ 0 (
-    echo [OK] Deno ya esta disponible en el PATH.
+    echo [OK] Deno is already available on the PATH.
 ) else if exist "%USERPROFILE%\.spotdl\deno.exe" (
-    echo [OK] Deno ya instalado para spotdl: %USERPROFILE%\.spotdl\deno.exe
+    echo [OK] Deno already installed for spotdl: %USERPROFILE%\.spotdl\deno.exe
 ) else (
     if defined SPOTDL_CMD (
-        echo [INFO] Descargando Deno con spotdl...
+        echo [INFO] Downloading Deno with spotdl...
         "!SPOTDL_CMD!" --download-deno
     ) else (
-        echo [AVISO] No se pudo localizar spotdl para descargar Deno.
-        echo         Ejecuta manualmente:  spotdl --download-deno
+        echo [NOTICE] Could not locate spotdl to download Deno.
+        echo          Run manually:  spotdl --download-deno
     )
 )
 echo.
@@ -83,46 +83,46 @@ echo.
 echo ---------------- ffmpeg ----------------
 where ffmpeg >nul 2>&1
 if !errorlevel! equ 0 (
-    echo [OK] ffmpeg encontrado en el PATH.
+    echo [OK] ffmpeg found on the PATH.
 ) else (
-    echo [AVISO] ffmpeg no encontrado.
+    echo [NOTICE] ffmpeg not found.
     where winget >nul 2>&1
     if !errorlevel! equ 0 (
-        echo [INFO] Intentando instalar ffmpeg con winget...
+        echo [INFO] Trying to install ffmpeg with winget...
         winget install --id Gyan.FFmpeg -e --accept-package-agreements --accept-source-agreements
-        echo [INFO] Cierra y vuelve a abrir la terminal para que ffmpeg quede en el PATH.
+        echo [INFO] Close and reopen the terminal so ffmpeg is added to the PATH.
     ) else (
-        echo Instala ffmpeg manualmente desde:
+        echo Install ffmpeg manually from:
         echo   https://www.gyan.dev/ffmpeg/builds/
-        echo y agrega su carpeta "bin" al PATH del sistema.
+        echo and add its "bin" folder to the system PATH.
     )
 )
 echo.
 
 :: ---------------------------------------------------------------
-:: 7) Resumen de versiones
+:: 7) Version summary
 :: ---------------------------------------------------------------
 echo ==========================================================
-echo   RESUMEN DE VERSIONES
+echo   VERSION SUMMARY
 echo ==========================================================
 if defined YTDLP_CMD (
     for /f "tokens=*" %%A in ('"!YTDLP_CMD!" --version 2^>nul') do echo yt-dlp : %%A
 ) else (
-    echo yt-dlp : NO ENCONTRADO
+    echo yt-dlp : NOT FOUND
 )
 if defined SPOTDL_CMD (
     for /f "tokens=*" %%A in ('"!SPOTDL_CMD!" --version 2^>nul') do echo spotdl : %%A
 ) else (
-    echo spotdl : NO ENCONTRADO
+    echo spotdl : NOT FOUND
 )
-where ffmpeg >nul 2>&1 && (echo ffmpeg : OK) || (echo ffmpeg : NO ENCONTRADO)
+where ffmpeg >nul 2>&1 && (echo ffmpeg : OK) || (echo ffmpeg : NOT FOUND)
 if exist "%USERPROFILE%\.spotdl\deno.exe" (
     echo Deno   : OK ^(spotdl^)
 ) else (
-    where deno >nul 2>&1 && (echo Deno   : OK ^(PATH^)) || (echo Deno   : NO ENCONTRADO)
+    where deno >nul 2>&1 && (echo Deno   : OK ^(PATH^)) || (echo Deno   : NOT FOUND)
 )
 echo ==========================================================
-echo Todo listo. Ya puedes usar los scripts del repositorio.
+echo All set. You can now use the scripts in this repository.
 
 :end
 echo.
@@ -130,8 +130,8 @@ pause
 exit /b 0
 
 :: ===============================================================
-:: Subrutina: busca un ejecutable (yt-dlp / spotdl) en PATH y en
-:: las carpetas Scripts de Python. Uso: call :find_tool VAR nombre
+:: Subroutine: finds an executable (yt-dlp / spotdl) on the PATH and
+:: in Python's Scripts folders. Usage: call :find_tool VAR name
 :: ===============================================================
 :find_tool
 set "%~1="

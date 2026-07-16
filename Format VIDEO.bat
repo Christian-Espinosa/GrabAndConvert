@@ -1,29 +1,29 @@
 @echo off
 setlocal enabledelayedexpansion
 
-REM Si se pasa un argumento (drag & drop), usarlo directamente
+REM If an argument is passed (drag & drop), use it directly
 if "%~1"=="" (
     set /p file_path="Enter the full path of the file (audio or video): "
 ) else (
     set "file_path=%~1"
 )
 
-REM Quitar comillas (por si acaso) y espacios extra
+REM Strip quotes (just in case) and extra spaces
 set "file_path=%file_path:"=%"
 
-REM Comprobar si el archivo existe
+REM Check if the file exists
 if not exist "%file_path%" (
     echo The file does not exist.
     pause
     exit /b
 )
 
-REM Extraer nombre, carpeta y extensión
+REM Extract name, folder and extension
 for %%F in ("%file_path%") do set "file_name=%%~nF"
 for %%F in ("%file_path%") do set "file_dir=%%~dpF"
 for %%F in ("%file_path%") do set "file_ext=%%~xF"
 
-REM Mostrar opciones
+REM Show options
 echo Select the format for conversion:
 echo 1. MP3 (Audio)
 echo 2. MP4 (Video)
@@ -37,7 +37,7 @@ echo 9. WMV (Video)
 echo 10. OGG (Audio)
 set /p format_choice="Enter your choice (1-10): "
 
-REM Determinar formato
+REM Determine format
 if "%format_choice%"=="1" set format=mp3
 if "%format_choice%"=="2" set format=mp4
 if "%format_choice%"=="3" set format=wav
@@ -55,7 +55,7 @@ if not defined format (
     exit /b
 )
 
-REM Generar nombre de salida
+REM Build output name (avoid overwriting)
 set "output_file=%file_dir%%file_name%.%format%"
 set count=1
 if exist "%output_file%" (
@@ -67,7 +67,7 @@ if exist "%output_file%" (
     )
 )
 
-REM Ejecutar FFmpeg
+REM Run FFmpeg
 ffmpeg -i "%file_path%" "%output_file%"
 echo Conversion complete! File saved as "%output_file%"
 

@@ -1,74 +1,74 @@
-# Scripts de descarga y conversión multimedia (Windows)
+# Media download & conversion scripts (Windows)
 
-Colección de scripts `.bat` para **Windows** pensados para descargar música/vídeo y convertir archivos multimedia de forma rápida y sencilla, sin necesidad de programas con interfaz.
+A collection of `.bat` scripts for **Windows** to download music/video and convert media files quickly and easily, with no GUI apps required.
 
-Todo funciona por menús interactivos en la consola. Están construidos sobre tres herramientas de código abierto muy conocidas: [yt-dlp](https://github.com/yt-dlp/yt-dlp), [spotDL](https://github.com/spotDL/spotify-downloader) y [FFmpeg](https://ffmpeg.org/).
+Everything works through interactive menus in the console. The scripts are built on three well-known open-source tools: [yt-dlp](https://github.com/yt-dlp/yt-dlp), [spotDL](https://github.com/spotDL/spotify-downloader) and [FFmpeg](https://ffmpeg.org/).
 
-> Uso responsable: descarga únicamente contenido sobre el que tengas derechos o que permita su descarga. Respeta los términos de servicio de cada plataforma y la legislación de tu país.
+> Responsible use: only download content you have the rights to, or that is allowed to be downloaded. Respect each platform's terms of service and your local laws.
 
 ---
 
-## Contenido del repositorio
+## What's in this repository
 
-| Script | Para qué sirve |
+| Script | What it does |
 |---|---|
-| `youtube downloader.bat` | Descarga canciones, vídeos, listas y álbumes de **YouTube**, **YouTube Music** y **Spotify** en MP3 o MP4. |
-| `Format VIDEO.bat` | Convierte archivos de **audio o vídeo** entre formatos (mp3, mp4, wav, mkv, flac, etc.). |
-| `Format IMG.bat` | Convierte **imágenes** entre formatos (jpg, png, webp, gif, etc.). |
-| `instalar_dependencias.bat` | Comprueba, **instala y actualiza** todas las librerías que necesitan los scripts. |
+| `youtube downloader.bat` | Downloads songs, videos, playlists and albums from **YouTube**, **YouTube Music** and **Spotify** as MP3 or MP4. |
+| `Format VIDEO.bat` | Converts **audio or video** files between formats (mp3, mp4, wav, mkv, flac, etc.). |
+| `Format IMG.bat` | Converts **images** between formats (jpg, png, webp, gif, etc.). |
+| `install_dependencies.bat` | Checks, **installs and updates** all the libraries the scripts need. |
 
 ---
 
-## Requisitos
+## Requirements
 
-- **Windows** con `cmd` (los scripts son archivos `.bat`).
-- **Python 3** (incluye `pip`) — necesario para instalar `yt-dlp` y `spotdl`.
-  - Descárgalo desde [python.org](https://www.python.org/downloads/) y marca **"Add Python to PATH"** durante la instalación.
-- El resto de dependencias (`yt-dlp`, `spotdl`, `ffmpeg`, `Deno`) las instala automáticamente `instalar_dependencias.bat`.
+- **Windows** with `cmd` (the scripts are `.bat` files).
+- **Python 3** (includes `pip`) — needed to install `yt-dlp` and `spotdl`.
+  - Get it from [python.org](https://www.python.org/downloads/) and tick **"Add Python to PATH"** during installation.
+- The remaining dependencies (`yt-dlp`, `spotdl`, `ffmpeg`, `Deno`) are installed automatically by `install_dependencies.bat`.
 
-### Instalación rápida
+### Quick setup
 
-1. Instala Python (ver arriba).
-2. Ejecuta **`instalar_dependencias.bat`** (doble clic).
+1. Install Python (see above).
+2. Run **`install_dependencies.bat`** (double-click).
 
-Eso deja el equipo listo: instala yt-dlp, spotdl, ffmpeg (vía winget si está disponible) y Deno, y muestra un resumen de versiones.
+That gets your machine ready: it installs yt-dlp, spotdl, ffmpeg (via winget when available) and Deno, and prints a version summary.
 
 ---
 
 ## `youtube downloader.bat`
 
-Descarga contenido de **YouTube**, **YouTube Music** y **Spotify**.
+Downloads content from **YouTube**, **YouTube Music** and **Spotify**.
 
-### Qué hace
+### What it does
 
-- **Detecta la plataforma** automáticamente por la URL:
-  - **YouTube / YouTube Music** → usa `yt-dlp` (permite MP3 o MP4).
-  - **Spotify** → usa `spotdl`. Spotify solo permite **audio (MP3)**; el vídeo no está disponible, así que se fuerza a MP3.
-- Acepta una **canción/vídeo suelto** o una **lista/álbum**.
-  - Si detecta una lista, **pregunta** si quieres descargarla entera (por si es un vídeo suelto dentro de una lista).
-  - **Solo en listas**, aplica una **espera de X segundos** entre elementos (configurable, 5 por defecto) para evitar bloqueos de la plataforma. Una sola canción se descarga sin espera.
-- Permite elegir **MP3** (solo audio) o **MP4** (vídeo).
-  - Para **MP4**, puedes elegir la **calidad máxima**: 2160p (4K), 1440p (2K), **1080p (por defecto)**, 720p o 480p. Descarga esa resolución o la más cercana por debajo.
-- **Limpia la URL** automáticamente: quita el texto que pegues por delante (p. ej. "Escucha esta lista: ...") y soporta URLs con `&` (parámetros como `?si=...&utm_source=...`).
-- No comprueba actualizaciones al arrancar (es ágil). Si algo falla, actualiza con `instalar_dependencias.bat`.
+- **Auto-detects the platform** from the URL:
+  - **YouTube / YouTube Music** → uses `yt-dlp` (MP3 or MP4).
+  - **Spotify** → uses `spotdl`. Spotify only allows **audio (MP3)**; video is not available, so it is forced to MP3.
+- Accepts a **single song/video** or a **playlist/album**.
+  - If it detects a playlist, it **asks** whether you want the whole thing (in case it is a single video inside a list).
+  - **Only for playlists**, it applies a **wait of X seconds** between items (configurable, default 5) to avoid platform rate limits. A single song is downloaded with no wait.
+- Lets you choose **MP3** (audio only) or **MP4** (video).
+  - For **MP4**, you can pick the **maximum quality**: 2160p (4K), 1440p (2K), **1080p (default)**, 720p or 480p. It downloads that resolution or the closest one below it.
+- **Cleans the URL** automatically: strips any text you paste in front (e.g. "Listen to this playlist: ...") and supports URLs with `&` (parameters like `?si=...&utm_source=...`).
+- It does not check for updates on startup (it's fast). If something fails, update with `install_dependencies.bat`.
 
-### Resiliencia
+### Resilience
 
-- Los vídeos de MP4 se prefieren en **H.264 + AAC** (máxima compatibilidad con reproductores y software de DJ), con reserva a lo mejor disponible.
-- Usa **Deno** (detectado automáticamente) para resolver el reto JavaScript que YouTube exige; sin él, a veces solo se obtendría el audio.
-- Si un formato da error 403, **reintenta automáticamente** con un stream alternativo (HLS).
-- En listas usa `--ignore-errors`: si un elemento no está disponible, lo omite y continúa con el resto.
+- MP4 videos prefer **H.264 + AAC** (maximum compatibility with players and DJ software), falling back to the best available.
+- Uses **Deno** (auto-detected) to solve the JavaScript challenge YouTube requires; without it, sometimes only the audio would be available.
+- If a format returns a 403 error, it **automatically retries** with an alternative stream (HLS).
+- For playlists it uses `--ignore-errors`: if an item is unavailable, it is skipped and the rest continue.
 
-### Uso
+### Usage
 
-1. Ejecuta `youtube downloader.bat`.
-2. Pega la **URL** (canción, vídeo, lista o álbum).
-3. Si es una lista, confirma si quieres bajarla entera.
-4. Elige **formato** (MP3/MP4) y, en MP4, la **calidad**.
-5. Indica la **carpeta** de destino (Enter = carpeta actual).
-6. En listas, indica los **segundos de espera** entre elementos.
+1. Run `youtube downloader.bat`.
+2. Paste the **URL** (song, video, playlist or album).
+3. If it's a playlist, confirm whether you want to download the whole thing.
+4. Choose the **format** (MP3/MP4) and, for MP4, the **quality**.
+5. Enter the destination **folder** (Enter = current folder).
+6. For playlists, enter the **wait seconds** between items.
 
-Ejemplos de URLs válidas:
+Valid URL examples:
 
 - `https://www.youtube.com/watch?v=VIDEO_ID`
 - `https://youtu.be/VIDEO_ID`
@@ -81,83 +81,83 @@ Ejemplos de URLs válidas:
 
 ## `Format VIDEO.bat`
 
-Convierte archivos de **audio o vídeo** de un formato a otro usando FFmpeg.
+Converts **audio or video** files from one format to another using FFmpeg.
 
-### Qué hace
+### What it does
 
-- Admite la ruta del archivo de dos formas:
-  - **Arrastrando y soltando** el archivo sobre el `.bat` (drag & drop), o
-  - **pegando la ruta** cuando la pida.
-- Formatos de salida disponibles:
+- Accepts the file path in two ways:
+  - **Drag & drop** the file onto the `.bat`, or
+  - **paste the path** when prompted.
+- Available output formats:
   - Audio: **MP3, WAV, AAC, FLAC, OGG**
-  - Vídeo: **MP4, AVI, MKV, MOV, WMV**
-- Si ya existe un archivo con el mismo nombre, **no lo sobrescribe**: crea `nombre_1`, `nombre_2`, etc.
+  - Video: **MP4, AVI, MKV, MOV, WMV**
+- If a file with the same name already exists, it **won't overwrite** it: it creates `name_1`, `name_2`, etc.
 
-### Uso
+### Usage
 
-1. Arrastra un archivo sobre `Format VIDEO.bat` (o ejecútalo y pega la ruta).
-2. Elige el número del formato de salida (1-10).
-3. El archivo convertido se guarda en la **misma carpeta** que el original.
+1. Drag a file onto `Format VIDEO.bat` (or run it and paste the path).
+2. Choose the output format number (1-10).
+3. The converted file is saved in the **same folder** as the original.
 
 ---
 
 ## `Format IMG.bat`
 
-Convierte **imágenes** de un formato a otro usando FFmpeg.
+Converts **images** from one format to another using FFmpeg.
 
-### Qué hace
+### What it does
 
-- Admite **arrastrar y soltar** o **pegar la ruta**.
-- Formatos de salida: **JPEG, PNG, BMP, GIF, TIFF, WEBP**.
-- No sobrescribe: si el nombre existe, añade `_1`, `_2`, etc.
+- Accepts **drag & drop** or a **pasted path**.
+- Output formats: **JPEG, PNG, BMP, GIF, TIFF, WEBP**.
+- Won't overwrite: if the name exists, it appends `_1`, `_2`, etc.
 
-### Uso
+### Usage
 
-1. Arrastra una imagen sobre `Format IMG.bat` (o ejecútalo y pega la ruta).
-2. Elige el número del formato de salida (1-6).
-3. La imagen convertida se guarda en la **misma carpeta** que la original.
-
----
-
-## `instalar_dependencias.bat`
-
-Prepara y mantiene el equipo para el resto de scripts.
-
-### Qué hace
-
-1. Localiza **Python/pip** (prueba `py -m pip`, `python -m pip` y `pip`).
-2. Instala o actualiza **yt-dlp**.
-3. Instala o actualiza **spotdl**.
-4. Descarga **Deno** (motor JavaScript que yt-dlp necesita para YouTube), reutilizando el de spotdl.
-5. Comprueba **ffmpeg** y, si falta, intenta instalarlo con **winget** (o indica cómo hacerlo a mano).
-6. Muestra un **resumen de versiones** de todo.
-
-Ejecútalo la primera vez para instalar todo, y cuando quieras **actualizar** las librerías o si una descarga empieza a fallar.
+1. Drag an image onto `Format IMG.bat` (or run it and paste the path).
+2. Choose the output format number (1-6).
+3. The converted image is saved in the **same folder** as the original.
 
 ---
 
-## Herramientas usadas
+## `install_dependencies.bat`
 
-| Herramienta | Uso | Enlace |
+Prepares and maintains your machine for the other scripts.
+
+### What it does
+
+1. Locates **Python/pip** (tries `py -m pip`, `python -m pip` and `pip`).
+2. Installs or updates **yt-dlp**.
+3. Installs or updates **spotdl**.
+4. Downloads **Deno** (the JavaScript runtime yt-dlp needs for YouTube), reusing spotdl's copy.
+5. Checks **ffmpeg** and, if missing, tries to install it with **winget** (or explains how to do it manually).
+6. Prints a **version summary** of everything.
+
+Run it the first time to install everything, and whenever you want to **update** the libraries or if a download starts failing.
+
+---
+
+## Tools used
+
+| Tool | Used for | Link |
 |---|---|---|
-| yt-dlp | Descargas de YouTube / YouTube Music | https://github.com/yt-dlp/yt-dlp |
-| spotDL | Descargas de Spotify (audio) | https://github.com/spotDL/spotify-downloader |
-| FFmpeg | Conversión de audio/vídeo/imagen | https://ffmpeg.org/ |
-| Deno | Motor JavaScript para yt-dlp | https://deno.com/ |
+| yt-dlp | YouTube / YouTube Music downloads | https://github.com/yt-dlp/yt-dlp |
+| spotDL | Spotify downloads (audio) | https://github.com/spotDL/spotify-downloader |
+| FFmpeg | Audio/video/image conversion | https://ffmpeg.org/ |
+| Deno | JavaScript runtime for yt-dlp | https://deno.com/ |
 
 ---
 
-## Solución de problemas
+## Troubleshooting
 
-- **"yt-dlp/spotdl no se reconoce" o descargas que fallan** → ejecuta `instalar_dependencias.bat` para instalar/actualizar todo.
-- **Descarga solo el audio en un vídeo de YouTube** → falta el motor JavaScript (Deno). Ejecuta `instalar_dependencias.bat`; el downloader lo detecta automáticamente.
-- **Spotify no descarga** → necesitas `spotdl` (lo instala `instalar_dependencias.bat`). Recuerda que Spotify solo permite audio (MP3).
-- **Conversión falla en `Format VIDEO.bat` / `Format IMG.bat`** → asegúrate de tener `ffmpeg` (lo instala/comprueba `instalar_dependencias.bat`).
-- **Una lista grande de YouTube da varios errores 403** → aumenta los segundos de espera entre elementos cuando el script lo pregunte.
+- **"yt-dlp/spotdl not recognized" or downloads failing** → run `install_dependencies.bat` to install/update everything.
+- **A YouTube video only downloads the audio** → the JavaScript runtime (Deno) is missing. Run `install_dependencies.bat`; the downloader detects it automatically.
+- **Spotify won't download** → you need `spotdl` (installed by `install_dependencies.bat`). Remember Spotify only allows audio (MP3).
+- **Conversion fails in `Format VIDEO.bat` / `Format IMG.bat`** → make sure `ffmpeg` is installed (checked/installed by `install_dependencies.bat`).
+- **A large YouTube playlist throws several 403 errors** → increase the wait seconds between items when the script asks.
 
 ---
 
-## Notas
+## Notes
 
-- Los scripts guardan los archivos con el **título original** del contenido; los caracteres no válidos se ajustan automáticamente.
-- No se recopila ni envía ningún dato: todo se ejecuta en local en tu equipo.
+- The scripts save files using the **original title** of the content; invalid characters are adjusted automatically.
+- No data is collected or sent: everything runs locally on your machine.
